@@ -2,6 +2,7 @@ from flask import Flask, request, abort
 from sh import git
 import os
 import shutil
+import json_file_builder
 
 app = Flask(__name__)
 
@@ -20,6 +21,9 @@ def webhook():
             if fname == 'manifest.json' or fname == 'manifest.yaml':
                 valid = True
                 break
+
+        json_file = json_file_builder.get(repo_name, valid)
+        print(json_file)
         
         try: 
             shutil.rmtree(f'./{repo_name}')
