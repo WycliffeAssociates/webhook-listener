@@ -24,11 +24,11 @@ def webhook():
         user_name = payload['repository']['owner']['username']
         repo_name = payload['repository']['name']
         repo_clone_url = payload['repository']['clone_url']
-        return clone_and_check_repo(repo_name, repo_clone_url)
+        return clone_and_check_repo(user_name,repo_name, repo_clone_url, s3)
     else:
         abort(400)
 
-def upload_file(user_name, repo_name, suffix):      
+def upload_file(user_name, repo_name, suffix, s3):      
     localfilename = f'./{repo_name}{suffix}.json'
     remotefilename = f'{user_name}/{repo_name}{suffix}.json'
     bucket_name = 'test-repo-badges-bucket'
@@ -39,7 +39,7 @@ def upload_file(user_name, repo_name, suffix):
     except ClientError as e: 
         logging.error(e)
 
-def clone_and_check_repo(repo_name, repo_clone_url):
+def clone_and_check_repo(user_name, repo_name, repo_clone_url, s3):
         has_manifest = False
         
         git.clone(repo_clone_url)
@@ -73,12 +73,13 @@ def clone_and_check_repo(repo_name, repo_clone_url):
         json_file_builder.get_has_manifest(repo_name=repo_name,suffix=manifest_suffix,is_valid=has_manifest)
         json_file_builder.get_num_invalid_usfm(repo_name=repo_name,suffix=usfm_suffix,num_invalid=num_invalid_usfm)
         
-        upload_file(user_name, repo_name, manifest_suffix)
-        upload_file(user_name, repo_name, usfm_suffix)
+        upload_file(user_name, repo_name, manifest_suffix, s3)
+        upload_file(user_name, repo_name, usfm_suffix, s3)
 
         try: 
             shutil.rmtree(f'./{repo_name}')
             os.remove(f'./{repo_name}.json')
+            os.remove(f'./{repo_name}_errors.json')
             
         except OSError as e:  ## if failed, report it back to the user ##
              print ("Error: %s - %s." % (e.filename, e.strerror))
