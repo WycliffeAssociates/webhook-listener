@@ -20,6 +20,17 @@ def webhook():
     else:
         abort(400)
 
+def upload_file(user_name, repo_name, suffix):      
+    localfilename = f'./{repo_name}{suffix}.json'
+    remotefilename = f'{user_name}/{repo_name}{suffix}.json'
+    bucket_name = 'test-repo-badges-bucket'
+    
+    try :
+        response = s3.upload_file(localfilename, bucket_name, remotefilename, ExtraArgs={'ACL':'public-read'})
+    
+    except ClientError as e: 
+        logging.error(e)
+
 def clone_and_check_repo(repo_name, repo_clone_url):
         has_manifest = False
         
@@ -48,21 +59,15 @@ def clone_and_check_repo(repo_name, repo_clone_url):
 
         print("# invalid USFM files = " + str(num_invalid_usfm))
 
-        has_manifest_json_file = json_file_builder.get_has_manifest(repo_name, has_manifest)
-        num_invalid_usfm_json_file = json_file_builder.get_num_invalid_usfm(repo_name, num_invalid_usfm)
-            
-        json_file_builder.get(repo_name=repo_name,is_valid=has_manifest)
+        manifest_suffix = ""
+        usfm_suffix = "_errors"
+
+        json_file_builder.get_has_manifest(repo_name=repo_name,suffix=manifest_suffix,is_valid=has_manifest)
+        json_file_builder.get_num_invalid_usfm(repo_name=repo_name,suffix=usfm_suffix,num_invalid=num_invalid_usfm)
         
-        localfilename = f'./{repo_name}.json'
-        remotefilename = f'{user_name}/{repo_name}.json'
-        bucket_name = 'test-repo-badges-bucket'
-        
-        try :
-            response = s3.upload_file(localfilename, bucket_name, remotefilename, ExtraArgs={'ACL':'public-read'})
-        
-        except ClientError as e: 
-            logging.error(e)
-        
+        upload_file(user_name, repo_name, manifest_suffix)
+        upload_file(user_name, repo_name, usfm_suffix)
+
         try: 
             shutil.rmtree(f'./{repo_name}')
             os.remove(f'./{repo_name}.json')

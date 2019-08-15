@@ -6,7 +6,7 @@ def write_json(filename, data):
     outfile.close()
     return outfile
 
-def get_has_manifest(repo_name, is_valid):
+def get_has_manifest(repo_name, suffix, is_valid):
     if is_valid:
         color = "brightgreen"
     else:
@@ -18,10 +18,10 @@ def get_has_manifest(repo_name, is_valid):
     data["message"] = str(is_valid).lower()
     data["color"] = color
 
-    filename = repo_name + "_hasManifest.json"
+    filename = repo_name + suffix + ".json"
     return write_json(filename, data)
 
-def get_num_invalid_usfm(repo_name, num_invalid):
+def get_num_invalid_usfm(repo_name, suffix, num_invalid):
     if num_invalid > 0:
         color = "red"
     else:
@@ -33,5 +33,5 @@ def get_num_invalid_usfm(repo_name, num_invalid):
     data["message"] = str(num_invalid)
     data["color"] = color
 
-    filename = repo_name + "_numInvalidUsfm.json"
+    filename = repo_name + suffix + ".json"
     return write_json(filename, data)
