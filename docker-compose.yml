@@ -3,10 +3,10 @@ version: '3.2'
 services:
   listener:
     build: .
-    image: nshanko/webhook-listener
     container_name: listener
     restart: on-failure
     ports:
       - 5000:5000
     volumes:
       - .:/webhooks/
+    env_file: variables.env
