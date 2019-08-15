@@ -38,15 +38,19 @@ def clone_and_check_repo(repo_name, repo_clone_url):
             if fname == 'manifest.json' or fname == 'manifest.yaml':
                 valid = True
 
+        num_invalid = 0
         for proc, outfile in zip(processes, outfiles):
             proc.wait()
             with open(outfile, 'r') as f:
                 result = f.read()
-                print(outfile)
-                print(result)
+                if result != "[]":
+                    num_invalid += 1
+                # print(outfile)
+                # print(result)
                 # if not bool(result):
                 #     valid = False
                 #     break
+        print("# invalid USFM files = " + str(num_invalid))
 
         json_file = json_file_builder.get(repo_name, valid)
         
