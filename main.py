@@ -19,7 +19,7 @@ def webhook():
         abort(400)
 
 def clone_and_check_repo(repo_name, repo_clone_url):
-        valid = False
+        has_manifest = False
         
         git.clone(repo_clone_url)
        
@@ -29,30 +29,25 @@ def clone_and_check_repo(repo_name, repo_clone_url):
             if fname.endswith('.usfm'):
                 infile = repo_name + '/' + fname
                 outfile = infile + "_out.json"
-                # proc = subprocess.Popen(["python3", "print_filename.py", infile, outfile])
                 proc = subprocess.Popen(["./usfmlinter/USFMLinter", "--input", infile, "--output", outfile])
                 processes.append(proc)
                 outfiles.append(outfile)
-                # break
 
             if fname == 'manifest.json' or fname == 'manifest.yaml':
-                valid = True
+                has_manifest = True
 
-        num_invalid = 0
+        num_invalid_usfm = 0
         for proc, outfile in zip(processes, outfiles):
             proc.wait()
             with open(outfile, 'r') as f:
                 result = f.read()
                 if result != "[]":
-                    num_invalid += 1
-                # print(outfile)
-                # print(result)
-                # if not bool(result):
-                #     valid = False
-                #     break
-        print("# invalid USFM files = " + str(num_invalid))
+                    num_invalid_usfm += 1
 
-        json_file = json_file_builder.get(repo_name, valid)
+        print("# invalid USFM files = " + str(num_invalid_usfm))
+
+        has_manifest_json_file = json_file_builder.get_has_manifest(repo_name, has_manifest)
+        num_invalid_usfm_json_file = json_file_builder.get_num_invalid_usfm(repo_name, num_invalid_usfm)
         
         try: 
             shutil.rmtree(f'./{repo_name}')
@@ -60,7 +55,7 @@ def clone_and_check_repo(repo_name, repo_clone_url):
         except OSError as e:  ## if failed, report it back to the user ##
              print ("Error: %s - %s." % (e.filename, e.strerror))
 
-        return str(valid), 200
+        return str(has_manifest), 200
 
 
 if __name__ == '__main__':
