@@ -9,3 +9,4 @@ services:
       - 5000:5000
     volumes:
       - .:/webhooks/
+    env_file: variables.env
