@@ -24,19 +24,29 @@ def clone_and_check_repo(repo_name, repo_clone_url):
         git.clone(repo_clone_url)
        
         processes = []
+        outfiles = []
         for fname in os.listdir(f'./{repo_name}'):
             if fname.endswith('.usfm'):
-                proc = subprocess.Popen(["python3", "print_filename.py", repo_name + '/' + fname])
+                infile = repo_name + '/' + fname
+                outfile = infile + "_out.json"
+                # proc = subprocess.Popen(["python3", "print_filename.py", infile, outfile])
+                proc = subprocess.Popen(["./usfmlinter/USFMLinter", "--input", infile, "--output", outfile])
                 processes.append(proc)
-
-                # TODO: Do check
+                outfiles.append(outfile)
+                # break
 
             if fname == 'manifest.json' or fname == 'manifest.yaml':
                 valid = True
-                break
 
-        for proc in processes:
+        for proc, outfile in zip(processes, outfiles):
             proc.wait()
+            with open(outfile, 'r') as f:
+                result = f.read()
+                print(outfile)
+                print(result)
+                # if not bool(result):
+                #     valid = False
+                #     break
 
         json_file = json_file_builder.get(repo_name, valid)
         
