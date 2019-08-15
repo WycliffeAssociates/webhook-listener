@@ -6,6 +6,14 @@ from botocore.exceptions import ClientError
 
 app = Flask(__name__)
 
+@app.route('/test', methods=['GET']) 
+def test():
+    if request.method == 'GET' :
+        return 'Your docker contianer is running', 200
+    
+    else:
+        abort(400)
+
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
