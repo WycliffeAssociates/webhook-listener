@@ -14,6 +14,11 @@ def webhook():
         payload = request.json
         repo_name = payload['repository']['name']
         repo_clone_url = payload['repository']['clone_url']
+        return clone_and_check_repo(repo_name, repo_clone_url)
+    else:
+        abort(400)
+
+def clone_and_check_repo(repo_name, repo_clone_url):
         valid = False
         
         git.clone(repo_clone_url)
@@ -21,7 +26,7 @@ def webhook():
         processes = []
         for fname in os.listdir(f'./{repo_name}'):
             if fname.endswith('.usfm'):
-                proc = subprocess.Popen([fname, "print_filename.py"])
+                proc = subprocess.Popen(["python3", "print_filename.py", repo_name + '/' + fname])
                 processes.append(proc)
 
                 # TODO: Do check
@@ -41,10 +46,7 @@ def webhook():
         except OSError as e:  ## if failed, report it back to the user ##
              print ("Error: %s - %s." % (e.filename, e.strerror))
 
-
         return str(valid), 200
-    else:
-        abort(400)
 
 
 if __name__ == '__main__':
