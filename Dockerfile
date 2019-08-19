@@ -1,13 +1,13 @@
-FROM Node:8.16-stretch-slim AS md_builder
+FROM node:8.16-stretch-slim AS md_builder
 RUN apt-get update && \
-    apt install -y git && \
+    apt-get install -y git && \
     git clone https://github.com/WycliffeAssociates/badge-markdown-generator /badge-markdown-generator
 WORKDIR /badge-markdown-generator
 RUN npm install --production && npm run build
 
 FROM python:3.7-stretch
 COPY . /webhooks/
-COPY --from=md_builder /badge-markdown-generator /webhooks/app/md
+COPY --from=md_builder /badge-markdown-generator/build /webhooks/app/md
 RUN apt-get update && apt-get install -y wget apt-transport-https && \
     wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg && \
     mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/ && \
