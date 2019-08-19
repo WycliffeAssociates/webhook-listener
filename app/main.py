@@ -1,21 +1,20 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, send_from_directory, render_template
 from sh import git
 import os , logging , subprocess , shutil , json_file_builder
 import boto3
 from botocore.exceptions import ClientError
 
-app = Flask(__name__)
+application = Flask(__name__, static_folder='md/static', template_folder='md')
 
-@app.route('/test', methods=['GET']) 
-def test():
-    if request.method == 'GET' :
-        return 'Your docker contianer is running', 200
-    
-    else:
-        abort(400)
+@application.route('/') 
+def index():
+    return render_template('index.html')
 
+@application.route('/static/<path:path>') 
+def static_stuff(path):
+    return send_from_directory('static', path)
 
-@app.route('/webhook', methods=['POST'])
+@application.route('/webhook', methods=['POST'])
 def webhook():
     if request.method == 'POST' and request.json is not None:
          
@@ -88,4 +87,4 @@ def clone_and_check_repo(user_name, repo_name, repo_clone_url, s3):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=80)
+    application.run(host='0.0.0.0', port=80)
