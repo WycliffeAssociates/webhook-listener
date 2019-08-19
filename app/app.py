@@ -49,7 +49,7 @@ def clone_and_check_repo(user_name, repo_name, repo_clone_url, s3):
             if fname.endswith('.usfm'):
                 infile = repo_name + '/' + fname
                 outfile = infile + "_out.json"
-                proc = subprocess.Popen(["./usfmlinter/USFMLinter", "--input", infile, "--output", outfile])
+                proc = subprocess.Popen(["../usfmlinter/USFMLinter", "--input", infile, "--output", outfile])
                 processes.append(proc)
                 outfiles.append(outfile)
 
